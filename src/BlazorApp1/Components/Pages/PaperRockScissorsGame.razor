@@ -1,0 +1,126 @@
+﻿@page "/RockPaperScissorsGame"
+@rendermode InteractiveServer
+
+<PageTitle>Rock Paper Scissors</PageTitle>
+
+<h3>Rock Paper Scissors</h3>
+
+<button class="btn btn-primary" @onclick='@(e => Play("Rock"))'>Rock</button>
+<button class="btn btn-primary" @onclick='@(e => Play("Paper"))'>Paper</button>
+<button class="btn btn-primary" @onclick='@(e => Play("Scissors"))'>Scissors</button>
+
+<p><strong>Your Choice is:</strong> @userChoice</p>
+<p><strong>Computer's Choice is:</strong> @computerChoice</p>
+<p><strong>Result:</strong> @result</p>
+
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Player</th>
+            <th>Score</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>You</td>
+            <td>@userScore</td>
+        </tr>
+        <tr>
+            <td>Computer</td>
+            <td>@computerScore</td>
+        </tr>
+    </tbody>
+</table>
+
+<h4>Total Games Played: @totalGames</h4>
+<h4>Last Games</h4>
+@if (gameHistory.Any())
+{
+    <ul>
+        @foreach (var game in gameHistory)
+        {
+            <li>@game</li>
+        }
+    </ul>
+}
+
+@if (gameEnded)
+{
+    <div class="modal show" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Game Over</h5>
+                    <button type="button" class="close" @onclick="RestartGame">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>@winnerMessage</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" @onclick="RestartGame">Reia jocul</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string[] choices = { "Rock", "Paper", "Scissors" };
+    private string userChoice = "";
+    private string computerChoice = "";
+    private string result = "";
+    private int userScore = 0;
+    private int computerScore = 0;
+    private int totalGames = 0;
+    private List<string> gameHistory = new List<string>();
+    private bool gameEnded = false;//devine true cand un jucator ajunge la 10 puncte
+    private string winnerMessage = "";//mesajul afisat la finalul jocului
+
+    private void Play(string choice)
+    {
+        userChoice = choice;//Salvează alegerea utilizatorului (choice).
+        computerChoice = choices[new Random().Next(choices.Length)];//Alege la întâmplare o alegere pentru calculator.
+        result = DetermineWinner(userChoice, computerChoice);
+        UpdateScores(result);
+        totalGames++; // Increment total games
+        gameHistory.Insert(0, $"{userChoice} vs {computerChoice}: {result}");//Adaugă runda curentă în istoric.
+
+        if (userScore >= 10 || computerScore >= 10)//Dacă unul dintre jucători atinge 10 puncte, jocul se termină.
+        {
+            gameEnded = true;
+            winnerMessage = userScore >= 10 ? "You won!" : "The calculator won!";
+        }
+    }
+
+    private string DetermineWinner(string user, string computer)
+    {
+        if (user == computer) return "Equality!";
+        if ((user == "Rock" && computer == "Scissors") ||
+            (user == "Paper" && computer == "Rock") ||
+            (user == "Scissors" && computer == "Paper"))
+        {
+            return "You won!";
+        }
+        return "The calculator won!";
+    }
+
+    private void UpdateScores(string result)
+    {
+        if (result == "You won!") userScore++;
+        else if (result == "The calculator won!") computerScore++;
+    }
+
+    private void RestartGame()
+    {
+        userScore = 0;
+        computerScore = 0;
+        totalGames = 0;
+        gameHistory.Clear();
+        gameEnded = false;
+        winnerMessage = "";
+    }
+}

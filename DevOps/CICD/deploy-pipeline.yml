@@ -1,0 +1,31 @@
+﻿trigger:
+  - main
+
+pool:
+  name: "demo-pool"
+
+steps:
+  - task: DotNetCoreCLI@2
+    displayName: "Publish Web API"
+    inputs:
+      command: "publish"
+      publishWebProjects: false
+      projects: "$(Build.SourcesDirectory)/src/BlazorApp1/BlazorApp1.csproj"
+      arguments: "--configuration Release --output $(Build.ArtifactStagingDirectory)"
+      zipAfterPublish: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: "Publish Build Artifacts"
+    inputs:
+      PathtoPublish: "$(Build.ArtifactStagingDirectory)"
+      ArtifactName: "drop"
+      publishLocation: "Container"
+
+  - task: AzureRmWebAppDeployment@5
+    displayName: "Deploy to Azure Web App"
+    inputs:
+      ConnectionType: "AzureRM"
+      azureSubscription: "demo-api"
+      appType: "webApp"
+      WebAppName: "blazor-games"
+      packageForLinux: "$(Build.ArtifactStagingDirectory)/BlazorApp1.zip"

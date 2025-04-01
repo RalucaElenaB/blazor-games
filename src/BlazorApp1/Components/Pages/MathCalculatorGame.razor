@@ -1,0 +1,66 @@
+﻿@page "/MathCalculatorGame"
+@rendermode InteractiveServer
+
+<PageTitle>Calculator</PageTitle>
+
+<h1>Math Calculator</h1>
+
+<div>
+    <label>First Number:</label>
+    <input type="number" @bind="firstNumber" class="form-control" placeholder="Enter first number" />
+</div>
+
+<div>
+    <label>Second Number:</label>
+    <input type="number" @bind="secondNumber" class="form-control" placeholder="Enter second number" />
+</div>
+
+<div>
+    <label>Operation:</label>
+    <select @bind="selectedOperator" class="form-control">
+        @foreach (var op in operators)
+        {
+            <option value="@op">@op</option>
+        }
+    </select>
+</div>
+
+<button class="btn btn-primary mt-2" @onclick="CalculateResult">Calculate</button>
+
+<h4>Result: @result</h4>
+
+@code {
+    private double? firstNumber { get; set; } = null;
+    private double? secondNumber { get; set; } = null;
+    private string selectedOperator { get; set; } = "+";
+    private double? result { get; set; } = null;
+
+    private string[] operators = { "+", "-", "*", "/", "%" };
+
+    private void CalculateResult()
+    {
+        if (firstNumber.HasValue && secondNumber.HasValue)
+        {
+            switch (selectedOperator)
+            {
+                case "+":
+                    result = firstNumber + secondNumber;
+                    break;
+                case "-":
+                    result = firstNumber - secondNumber;
+                    break;
+                case "*":
+                    result = firstNumber * secondNumber;
+                    break;
+                case "/":
+                    result = secondNumber != 0 ? firstNumber / secondNumber : double.NaN;
+                    break;
+                case "%":
+                    result = firstNumber % secondNumber;
+                    break;
+            }
+            firstNumber = result; // Setăm rezultatul ca primul număr
+            secondNumber = null; // Resetăm al doilea număr
+        }
+    }
+}
